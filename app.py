@@ -32,7 +32,6 @@ def log_parser(filename):
     df = pd.DataFrame(content)
     if df.empty:
         return "## No Trade History Now!", {"### All Trade History":df}
-    st.table(df)
     df['open'] = df.enpp
     if 'price' in df.columns:
         df['close'] = df.price.fillna(df.spp)
@@ -66,8 +65,18 @@ def log_parser(filename):
 
 def main():
     default = "请选择..."
-    filename = st.selectbox(
-        '日志文件', options=[default] + sorted(glob.glob("./*.log")))
+    cols = st.columns([1, 1])
+    with cols[0]:
+        symbol = st.selectbox(
+            "币种：", options=[default, "BTC", "BNB", "DOGE"])
+    with cols[1]:
+        if symbol == default:
+            symbol = "*"
+        else:
+            symbol = symbol.lower()
+        filename = st.selectbox(
+            '日志文件：', options=[default] + sorted(
+                glob.glob(f"./{symbol}-*.log")))
     if filename != default:
         summary, res = log_parser(filename)
         st.markdown(summary)
